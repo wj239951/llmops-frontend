@@ -43,11 +43,11 @@ Prompt工程中心
             description: '面向工业 LLMOps 的本地 DeepSeek 助手',
             system_prompt: '你是工业 LLMOps 平台中的专业 AI Agent，请结合工程实践回答。',
             model_provider: 'ollama',
-            model_name: 'deepseek-r1-local'
+            model_name: 'deepseek-r1:7b'
 
             })
             watch(() => form.model_provider, (value) => { form.model_name = value === 'ollama' ?
-            'deepseek-r1-local' : 'gpt-4o-mini' })
+            'deepseek-r1:7b' : 'gpt-4o-mini' })
             async function load() { rows.value = (await listPrompts()).data }
             async function save() { await createPrompt(form); await load() }
             async function remove(id: number) { await deletePrompt(id); await load() }

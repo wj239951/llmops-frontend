@@ -117,7 +117,7 @@ const form = reactive({
 watch(
     () => form.model_provider,
     (value) => {
-form.model_name = value === 'ollama' ? 'deepseek-r1-local' : 'gpt-4o-mini'
+form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : 'gpt-4o-mini'
     }
 )
 async function loadPrompts() {prompts.value = (await listPrompts()).data
