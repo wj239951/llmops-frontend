@@ -17,7 +17,7 @@
             <el-form-item>
             <el-form-item label="模型名称"><el-input v-model="form.model_name"
             style="width: 260px" /></el-form-item>
-            <el-button type="primary" @click="save">{{ editingId ? '保存当前修改' : '新增Prompt' }}</el-button>
+            <el-button type="primary" @click="save">{{ editingId ? '保存修改' : '新增Prompt' }}</el-button>
             </el-form-item>
             </el-form>
             </div>
