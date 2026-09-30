@@ -15,9 +15,14 @@ RAG知识库中心
         <el-table-column prop="title" label="标题" />
         <el-table-column prop="source" label="来源" />
         <el-table-column prop="created_at" label="创建时间" />
-        <el-table-column label="操作" width="120">
+        <el-table-column label="操作1" width="120">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="editRow(row)">修改</el-button>
+          </template>
+        </el-table-column>
+         <el-table-column label="操作2" width="120">
+          <template #default="{ row }">
+            <el-button type="primary" size="small" @click="deleteRow(row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -26,7 +31,7 @@ RAG知识库中心
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { createKnowledge, listKnowledge, updateKnowledge } from '../api/knowledge'
+import { createKnowledge, listKnowledge, updateKnowledge, deleteKnowledge } from '../api/knowledge'
 const rows = ref<any[]>([])
 const KnowledgeId = ref<number | null>(null) // 正在编辑的知识库ID
 const form = reactive({
@@ -49,6 +54,11 @@ async function editRow(row: any) {
   form.title = row.title           // 逐个字段赋值，避免污染 id/created_at
   form.content = row.content
 }
+async function deleteRow(row: any) {
+  await deleteKnowledge(row.id)
+  await load()
+}
+
     async function load() { rows.value = (await listKnowledge()).data }
       onMounted(load)
     </script>
