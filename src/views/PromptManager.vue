@@ -68,8 +68,8 @@
                 form.name = ''
                 form.description = ''
                 form.system_prompt = ''
-                form.model_provider = 'ollama'
-                form.model_name = 'deepseek-r1:7b'
+                form.model_provider = ''
+                form.model_name = ''
              }
             async function editRow(row: any) {
               Object.assign(form, row)      // 把这一行的数据拷进 form
