@@ -5,8 +5,7 @@ RAG知识库中心
     <div class="card">
       <el-input v-model="form.title" placeholder="文档标题" style="margin-bottom:
 10px" />
-      <el-input v-model="form.content" type="textarea" :rows="8" placeholder="文档内
-容" />
+      <el-input v-model="form.content" type="textarea" :rows="8" placeholder="文档内容" />
       <el-button type="primary" style="margin-top: 10px" @click="save">{{ KnowledgeId ? '保存修改' : '新增文档' }}</el-button>
     </div>
     <div class="card">
