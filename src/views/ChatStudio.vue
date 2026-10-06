@@ -43,11 +43,8 @@ Key。"
             </el-select>
            </el-form-item>
 
-           <el-form-item label="启用 RAG(检索增强索引)">
+           <el-form-item label="启用 RAG">
             <el-switch v-model="form.use_rag" />
-           </el-form-item>
-           <el-form-item label="开启会话记忆">
-            <el-switch v-model="form.memory_enabled" />
            </el-form-item>
             <el-form-item label="聊天标识">
               <el-input v-model="form.conversation_id" style="width: 300px" />
@@ -90,6 +87,18 @@ Key。"
 type="success"
 style="margin-top: 10px"
 />
+<div v-if="sources.length" style="margin-top: 12px">
+  <el-button text type="primary" size="small" @click="sourcesExpanded = !sourcesExpanded">
+    {{ sourcesExpanded ? '收起' : '展开' }} {{ sources.length }} 个参考来源
+  </el-button>
+  <div v-show="sourcesExpanded" style="margin-top: 8px">
+    <div v-for="(s, i) in sources" :key="i" class="source-item">
+      <span class="source-title">{{ s.title || '来源 ' + (i + 1) }}</span>
+      <a v-if="s.source" :href="s.source" target="_blank" class="source-link">{{ s.source }}</a>
+      <p v-if="s.snippet" class="source-snippet">{{ s.snippet }}</p>
+    </div>
+  </div>
+</div>
 </div>
 </div>
 </template>
@@ -104,6 +113,8 @@ const answer = ref('')
 const reasoning = ref('')
 const meta = ref('')
 const thought = ref('')
+const sources = ref<any[]>([])
+const sourcesExpanded = ref(false)
 const prompts = ref<any[]>([])
 const form = reactive({
   query: '请介绍一下你自己',
@@ -111,7 +122,6 @@ const form = reactive({
   model_provider: 'ollama',
   model_name: 'deepseek-r1:7b',
   use_rag: false,
-  memory_enabled: true,
   conversation_id: ''
 })
 watch(
@@ -128,13 +138,16 @@ async function submit() {
   reasoning.value = ''
   thought.value = ''
   meta.value = ''
+  sources.value = []
+  sourcesExpanded.value = false
 
   try {
     const res = await sendChat(form)
     answer.value = res.data.answer
-reasoning.value = res.data.reasoning || ''
-thought.value = res.data.thought
-meta.value = `${res.data.model_provider} / ${res.data.model_name} /
+    reasoning.value = res.data.reasoning || ''
+    thought.value = res.data.thought
+    sources.value = res.data.sources || []
+    meta.value = `${res.data.model_provider} / ${res.data.model_name} /
 tokens=${res.data.total_tokens} / ${res.data.latency_ms}ms`
 } catch (e: any) {
 answer.value = '请求失败：' + (e.response?.data?.detail || e.message)
@@ -144,3 +157,25 @@ loading.value = false
 }
 onMounted(loadPrompts)
 </script>
+
+<style scoped>
+.source-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+.source-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+.source-link {
+  display: block;
+  font-size: 12px;
+  color: #409eff;
+  word-break: break-all;
+}
+.source-snippet {
+  font-size: 13px;
+  color: #666;
+  margin: 4px 0 0;
+}
+</style>
