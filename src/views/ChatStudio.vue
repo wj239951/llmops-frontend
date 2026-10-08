@@ -46,9 +46,25 @@ Key。"
            <el-form-item label="启用 RAG">
             <el-switch v-model="form.use_rag" />
            </el-form-item>
-            <el-form-item label="聊天标识">
-              <el-input v-model="form.conversation_id" style="width: 300px" />
-           </el-form-item>
+            <el-form-item label="会话历史">
+              <el-select v-model="form.conversation_id" clearable style="width: 300px" @change="switchConversation">
+                <el-option
+                  v-for="c in conversations"
+                  :key="c.id"
+                  :label="c.title + '  (' + c.created_at.replace('T', ' ').slice(0, 16) + ')'"
+                  :value="c.id"
+                />
+              </el-select>
+              <el-button type="primary" plain size="small" style="margin-left: 10px" @click="newConversation">
+                新建会话
+              </el-button>
+              <el-button type="danger" plain size="small" style="margin-left: 6px" @click="deleteCurrentConversation">
+                删除会话
+              </el-button>
+            </el-form-item>
+            <el-form-item label="启用记忆">
+              <el-switch v-model="form.memory_enabled" />
+            </el-form-item>
            <el-form-item label="用户输入">
             <el-input v-model="form.query" type="textarea" :rows="5" />
            </el-form-item>
@@ -58,6 +74,13 @@ Key。"
             发送
            </el-button>
           </el-form>
+         </div>
+         <div class="card" v-if="messages.length">
+            <h3>历史消息</h3>
+            <div v-for="(msg, i) in messages" :key="i" class="message-item">
+              <div class="message-user"><strong>用户：</strong>{{ msg.user_input }}</div>
+              <div class="message-assistant"><strong>助手：</strong>{{ msg.assistant_output }}</div>
+            </div>
          </div>
          <div class="card" v-if="reasoning">
             <h3>思考过程</h3>
@@ -107,6 +130,7 @@ style="margin-top: 10px"
 import { onMounted, reactive, ref, watch } from 'vue'
 import { sendChat } from '../api/chat'
 import { listPrompts } from '../api/prompt'
+import { listConversations, createConversation, getMessages, deleteConversation } from '../api/conversations'
 
 const loading = ref(false)
 const answer = ref('')
@@ -116,12 +140,15 @@ const thought = ref('')
 const sources = ref<any[]>([])
 const sourcesExpanded = ref(false)
 const prompts = ref<any[]>([])
+const conversations = ref<any[]>([])
+const messages = ref<any[]>([])
 const form = reactive({
   query: '请介绍一下你自己',
   prompt_id: undefined as number | undefined,
   model_provider: 'ollama',
   model_name: 'deepseek-r1:7b',
-  use_rag: false,
+  use_rag: true,
+  memory_enabled: true,
   conversation_id: ''
 })
 watch(
@@ -131,6 +158,45 @@ form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : 'gpt-4o-mini'
     }
 )
 async function loadPrompts() {prompts.value = (await listPrompts()).data
+}
+async function loadConversations() {
+  conversations.value = (await listConversations()).data
+}
+async function newConversation() {
+  const res = await createConversation()
+  const newConv = res.data
+  conversations.value.unshift(newConv)
+  form.conversation_id = newConv.id
+  messages.value = []
+  answer.value = ''
+  reasoning.value = ''
+  thought.value = ''
+  meta.value = ''
+  sources.value = []
+}
+async function switchConversation() {
+  if (!form.conversation_id) {
+    messages.value = []
+    return
+  }
+  try {
+    const res = await getMessages(form.conversation_id)
+    messages.value = res.data
+  } catch (e: any) {
+    messages.value = []
+  }
+}
+async function deleteCurrentConversation() {
+  if (!form.conversation_id) return
+  await deleteConversation(form.conversation_id)
+  form.conversation_id = ''
+  messages.value = []
+  answer.value = ''
+  reasoning.value = ''
+  thought.value = ''
+  meta.value = ''
+  sources.value = []
+  await loadConversations()
 }
 async function submit() {
   loading.value = true
@@ -149,13 +215,17 @@ async function submit() {
     sources.value = res.data.sources || []
     meta.value = `${res.data.model_provider} / ${res.data.model_name} /
 tokens=${res.data.total_tokens} / ${res.data.latency_ms}ms`
+    await loadConversations()
+    if (form.conversation_id) {
+      await switchConversation()
+    }
 } catch (e: any) {
 answer.value = '请求失败：' + (e.response?.data?.detail || e.message)
 } finally {
 loading.value = false
 }
 }
-onMounted(loadPrompts)
+onMounted(() => { loadPrompts(); loadConversations() })
 </script>
 
 <style scoped>
@@ -177,5 +247,17 @@ onMounted(loadPrompts)
   font-size: 13px;
   color: #666;
   margin: 4px 0 0;
+}
+.message-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+.message-user {
+  margin-bottom: 6px;
+  color: #333;
+}
+.message-assistant {
+  color: #555;
+  white-space: pre-wrap;
 }
 </style>
