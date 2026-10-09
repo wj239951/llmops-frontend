@@ -3,4 +3,6 @@
 //分页查询
 //状态过滤
 import { request } from './request'
-export function listLogs() { return request.get('/logs') }
+export function listLogs(params?: { page?: number; page_size?: number; status?: string }) {
+  return request.get('/logs', { params })
+}
