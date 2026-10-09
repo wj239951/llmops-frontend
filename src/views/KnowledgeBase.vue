@@ -3,10 +3,26 @@ RAG知识库中心
   <div>
     <h1>知识库</h1>
     <div class="card">
+      <h3>手动输入</h3>
       <el-input v-model="form.title" placeholder="文档标题" style="margin-bottom:
 10px" />
       <el-input v-model="form.content" type="textarea" :rows="8" placeholder="文档内容" />
       <el-button type="primary" style="margin-top: 10px" @click="save">{{ KnowledgeId ? '保存修改' : '新增文档' }}</el-button>
+    </div>
+    <div class="card">
+      <h3>文件上传</h3>
+      <el-upload
+        :auto-upload="false"
+        :on-change="handleFileChange"
+        :limit="1"
+        accept=".txt,.md,.pdf,.py,.json"
+      >
+        <el-button type="primary">选择文件</el-button>
+        <template #tip>
+          <div class="el-upload__tip">支持 txt/md/pdf/py/json 格式</div>
+        </template>
+      </el-upload>
+      <el-button type="success" style="margin-top: 10px" @click="upload" :disabled="!selectedFile">上传并解析</el-button>
     </div>
     <div class="card">
         <el-table :data="rows">
@@ -30,13 +46,32 @@ RAG知识库中心
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { createKnowledge, listKnowledge, updateKnowledge, deleteKnowledge } from '../api/knowledge'
+import { createKnowledge, listKnowledge, updateKnowledge, deleteKnowledge, uploadKnowledge } from '../api/knowledge'
+import { ElMessage } from 'element-plus'
+
 const rows = ref<any[]>([])
 const KnowledgeId = ref<number | null>(null) // 正在编辑的知识库ID
+const selectedFile = ref<File | null>(null)
 const form = reactive({
   title: 'LLMOps 说明',
   content: 'Prompt 管理、RAG、模型调用、日志监控、工具调用是工业 LLMOps 的核心能力。本地版使用Ollama 调用 deepseek-R1:7b，ChatGPT 保留 Key 模式。'
 })
+
+function handleFileChange(file: any) {
+  selectedFile.value = file.raw
+}
+
+async function upload() {
+  if (!selectedFile.value) return
+  try {
+    await uploadKnowledge(selectedFile.value)
+    ElMessage.success('文件上传成功')
+    selectedFile.value = null
+    await load()
+  } catch (e: any) {
+    ElMessage.error(e.response?.data?.detail || '上传失败')
+  }
+}
 async function save() { 
   if (KnowledgeId.value) { // 修改
     await updateKnowledge(KnowledgeId.value, form)
