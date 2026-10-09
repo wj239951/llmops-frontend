@@ -54,7 +54,7 @@ const KnowledgeId = ref<number | null>(null) // 正在编辑的知识库ID
 const selectedFile = ref<File | null>(null)
 const form = reactive({
   title: 'LLMOps 说明',
-  content: 'Prompt 管理、RAG、模型调用、日志监控、工具调用是工业 LLMOps 的核心能力。本地版使用Ollama 调用 deepseek-R1:7b，ChatGPT 保留 Key 模式。'
+  content: 'Prompt 管理、RAG、模型调用、日志监控、工具调用是工业 LLMOps 的核心能力。本地版使用Ollama 调用 deepseek-R1:7b，云端使用 DeepSeek API。'
 })
 
 function handleFileChange(file: any) {

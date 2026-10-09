@@ -15,8 +15,7 @@ Token统计
 
     <div class="card">
       <el-alert
-        title="默认走本地 Ollama + deepseek-r1:7b；选择 ChatGPT 时走 OpenAI API
-Key。"
+        title="默认走本地 Ollama + deepseek-r1:7b；选择 DeepSeek 时走 DeepSeek 云端 API。"
         type="info"
         show-icon
       />
@@ -24,12 +23,14 @@ Key。"
         <el-form-item label="模型提供商">
           <el-select v-model="form.model_provider" style="width: 300px">
           <el-option label="本地 DeepSeek-R1:7b / Ollama" value="ollama" />
-          <el-option label="ChatGPT / OpenAI Key" value="openai" />
+          <el-option label="DeepSeek 云端 API" value="deepseek" />
         </el-select>
         </el-form-item>
 
         <el-form-item label="模型名称">
-          <el-input v-model="form.model_name" style="width: 300px" />
+          <el-select v-model="form.model_name" style="width: 300px">
+            <el-option v-for="m in modelOptions" :key="m" :label="m" :value="m" />
+          </el-select>
         </el-form-item>
 
         <el-form-item label="选择 Prompt">
@@ -127,7 +128,7 @@ style="margin-top: 10px"
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { sendChat } from '../api/chat'
 import { listPrompts } from '../api/prompt'
 import { listConversations, createConversation, getMessages, deleteConversation } from '../api/conversations'
@@ -151,10 +152,15 @@ const form = reactive({
   memory_enabled: true,
   conversation_id: ''
 })
+const modelOptions = computed(() =>
+  form.model_provider === 'ollama'
+    ? ['deepseek-r1:7b']
+    : ['deepseek-chat', 'deepseek-v4-pro', 'deepseek-flash']
+)
 watch(
     () => form.model_provider,
     (value) => {
-form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : 'gpt-4o-mini'
+      form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : 'deepseek-v4-pro'
     }
 )
 async function loadPrompts() {prompts.value = (await listPrompts()).data

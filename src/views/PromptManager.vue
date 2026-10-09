@@ -11,12 +11,15 @@
             <el-form-item label="模型提供商">
                 <el-select v-model="form.model_provider" style="width: 260px">
                 <el-option label="本地 Ollama" value="ollama" />
-            <el-option label="ChatGPT / OpenAI" value="openai" />
+            <el-option label="DeepSeek 云端" value="deepseek" />
             </el-select>
             </el-form-item>
             <el-form-item>
-            <el-form-item label="模型名称"><el-input v-model="form.model_name"
-            style="width: 260px" /></el-form-item>
+            <el-form-item label="模型名称">
+                <el-select v-model="form.model_name" style="width: 260px">
+                <el-option v-for="m in modelOptions" :key="m" :label="m" :value="m" />
+                </el-select>
+            </el-form-item>
             <el-button type="primary" @click="save">{{ editingId ? '保存修改' : '新增Prompt' }}</el-button>
             </el-form-item>
             </el-form>
@@ -43,7 +46,7 @@
             </div>
             </template>
             <script setup lang="ts">
-            import { onMounted, reactive, ref, watch } from 'vue'
+            import { computed, onMounted, reactive, ref, watch } from 'vue'
             import { createPrompt, deletePrompt, listPrompts, updatePrompt } from '../api/prompt'//多引入updataPrompt
             const rows = ref<any[]>([])
             const editingId = ref<number | null>(null)// 正在编辑的 Prompt ID
@@ -55,7 +58,12 @@
             model_name: 'deepseek-r1:7b'
 
             })
-            watch(() => form.model_provider, (value) => { form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : 'gpt-4o-mini' })
+            const modelOptions = computed(() =>
+    form.model_provider === 'ollama'
+        ? ['deepseek-r1:7b']
+        : ['deepseek-chat', 'deepseek-v4-pro', 'deepseek-flash']
+)
+            watch(() => form.model_provider, (value) => { form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : 'deepseek-v4-pro' })
             async function load() { rows.value = (await listPrompts()).data }
             async function save() { 
                 if (editingId.value) { // 修改
