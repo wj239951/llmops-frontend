@@ -15,7 +15,7 @@ Token统计
 
     <div class="card">
       <el-alert
-        title="默认走本地 Ollama + deepseek-r1:7b；选择 DeepSeek 时走 DeepSeek 云端 API；选择 Qoder 时走云端 Agent（会话式，较慢）。"
+        title="默认走本地 Ollama + deepseek-r1:7b；选择 DeepSeek 时走 DeepSeek 云端 API。"
         type="info"
         show-icon
       />
@@ -24,7 +24,6 @@ Token统计
           <el-select v-model="form.model_provider" style="width: 300px">
           <el-option label="本地 DeepSeek-R1:7b / Ollama" value="ollama" />
           <el-option label="DeepSeek 云端 API" value="deepseek" />
-          <el-option label="Qoder 云端 Agent" value="qoder" />
         </el-select>
         </el-form-item>
 
@@ -156,14 +155,12 @@ const form = reactive({
 const modelOptions = computed(() =>
   form.model_provider === 'ollama'
     ? ['deepseek-r1:7b']
-    : form.model_provider === 'qoder'
-      ? ['qoder-cloud-agent']
-      : ['deepseek-chat', 'deepseek-v4-pro', 'deepseek-flash']
+    : ['deepseek-chat', 'deepseek-v4-pro', 'deepseek-flash']
 )
 watch(
     () => form.model_provider,
     (value) => {
-      form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : value === 'qoder' ? 'qoder-cloud-agent' : 'deepseek-v4-pro'
+      form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : 'deepseek-v4-pro'
     }
 )
 async function loadPrompts() {prompts.value = (await listPrompts()).data
