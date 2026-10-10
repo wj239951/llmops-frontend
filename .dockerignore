@@ -1,0 +1,15 @@
+# 依赖目录：镜像里用 npm ci 重新装，不拷本地的（几百 MB）
+node_modules/
+
+# 构建产物：镜像内会重新 build
+dist/
+
+# git / IDE / 日志
+.git/
+.idea/
+.vscode/
+*.log
+
+# Docker 自身文件
+Dockerfile
+.dockerignore
