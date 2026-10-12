@@ -32,15 +32,15 @@
 import { ref } from 'vue'
 
 // 演示口令（写死，改成你的口令即可）
-const DEMO_PASSWORD = 'demo2025'
-// 会话级解锁：刷新不丢，关掉浏览器后重新验证
-const authed = ref(sessionStorage.getItem('llmops_authed') === '1')
+const DEMO_PASSWORD = 'demo2026'
+// 有 token 即视为已解锁；token 同时随请求发往后端做鉴权
+const authed = ref(!!localStorage.getItem('token'))
 const pwd = ref('')
 const err = ref(false)
 
 function unlock() {
   if (pwd.value === DEMO_PASSWORD) {
-    sessionStorage.setItem('llmops_authed', '1')
+    localStorage.setItem('token', DEMO_PASSWORD)
     authed.value = true
   } else {
     err.value = true
