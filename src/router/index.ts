@@ -13,6 +13,8 @@ routes: [
 { path: '/', component: ChatStudio },
 { path: '/prompts', component: PromptManager },
 { path: '/knowledge', component: KnowledgeBase },
-{ path: '/logs', component: RunLogs }
+{ path: '/logs', component: RunLogs },
+// 兜底路由：所有未匹配的路径重定向回首页，避免空白页
+{ path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 })

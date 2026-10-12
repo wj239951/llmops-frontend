@@ -7,7 +7,7 @@
   <div class="layout">
     <aside>
       <h2>工业 LLMOps</h2>
-      <p class="sub">Ollama + deepssk-r1</p>
+      <p class="sub">Ollama + deepseek-r1</p>
       <RouterLink to="/">Chat studio</RouterLink>
       <RouterLink to="/prompts">Prompt 编排</RouterLink>
       <RouterLink to="/knowledge">知识库</RouterLink>
@@ -29,6 +29,8 @@ body {
    aside h2 { margin-bottom: 4px;}
    .sub {color: #0fb0d8;font-size: 12px;margin-bottom: 20px;margin-top: 0;}
     aside a {display: block;color: #0fb0d8;text-decoration: none;margin: 16px 0;}
+    /* 当前页导航高亮：必须用 exact-active，否则 "/" 链接在任何页面都会亮 */
+    aside a.router-link-exact-active {color: #ffffff;font-weight: bold;}
     main {flex: 1;padding: 24px}
     .card {background: #fff;border-radius: 12px;padding: 18px;box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);margin-bottom: 16px;}
     </style>
