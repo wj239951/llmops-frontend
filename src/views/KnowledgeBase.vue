@@ -69,7 +69,7 @@ async function upload() {
     selectedFile.value = null
     await load()
   } catch (e: any) {
-    ElMessage.error(e.response?.data?.detail || '上传失败')
+    // 错误提示已由 request.ts 的响应拦截器统一处理
   }
 }
 async function save() { 
@@ -93,6 +93,6 @@ async function deleteRow(row: any) {
   await load()
 }
 
-    async function load() { rows.value = (await listKnowledge()).data }
+    async function load() { rows.value = await listKnowledge() }
       onMounted(load)
     </script>

@@ -163,14 +163,13 @@ watch(
       form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : 'deepseek-v4-pro'
     }
 )
-async function loadPrompts() {prompts.value = (await listPrompts()).data
+async function loadPrompts() {prompts.value = await listPrompts()
 }
 async function loadConversations() {
-  conversations.value = (await listConversations()).data
+  conversations.value = await listConversations()
 }
 async function newConversation() {
-  const res = await createConversation()
-  const newConv = res.data
+  const newConv = await createConversation()
   conversations.value.unshift(newConv)
   form.conversation_id = newConv.id
   messages.value = []
@@ -187,7 +186,7 @@ async function switchConversation() {
   }
   try {
     const res = await getMessages(form.conversation_id)
-    messages.value = res.data
+    messages.value = res
   } catch (e: any) {
     messages.value = []
   }
@@ -215,12 +214,12 @@ async function submit() {
 
   try {
     const res = await sendChat(form)
-    answer.value = res.data.answer
-    reasoning.value = res.data.reasoning || ''
-    thought.value = res.data.thought
-    sources.value = res.data.sources || []
-    meta.value = `${res.data.model_provider} / ${res.data.model_name} /
-tokens=${res.data.total_tokens} / ${res.data.latency_ms}ms`
+    answer.value = res.answer
+    reasoning.value = res.reasoning || ''
+    thought.value = res.thought
+    sources.value = res.sources || []
+    meta.value = `${res.model_provider} / ${res.model_name} /
+tokens=${res.total_tokens} / ${res.latency_ms}ms`
     await loadConversations()
     if (form.conversation_id) {
       await switchConversation()

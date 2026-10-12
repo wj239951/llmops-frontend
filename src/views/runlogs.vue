@@ -41,7 +41,7 @@ const status = ref('')     // 状态筛选，空=全部
 async function load() {
   const params: any = { page: page.value, page_size: pageSize.value }
   if (status.value) params.status = status.value  // 选了才传，不传后端返回全部
-  const data = (await listLogs(params)).data
+  const data = await listLogs(params)
   rows.value = data.items
   total.value = data.total
 }

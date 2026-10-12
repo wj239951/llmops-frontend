@@ -64,7 +64,7 @@
         : ['deepseek-chat', 'deepseek-v4-pro', 'deepseek-flash']
 )
             watch(() => form.model_provider, (value) => { form.model_name = value === 'ollama' ? 'deepseek-r1:7b' : 'deepseek-v4-pro' })
-            async function load() { rows.value = (await listPrompts()).data }
+            async function load() { rows.value = await listPrompts() }
             async function save() { 
                 if (editingId.value) { // 修改
                     await updatePrompt(editingId.value, form)
