@@ -1,14 +1,19 @@
 //会话管理接口封装
-import { request } from './request'
+import { http } from './request'
+import type { ChatMessage, Conversation } from '../types'
 
-export function listConversations() { return request.get('/conversations') }
+export function listConversations() {
+  return http.get<Conversation[]>('/conversations')
+}
 
-export function createConversation() { return request.post('/conversations') }
+export function createConversation() {
+  return http.post<Conversation>('/conversations')
+}
 
 export function getMessages(conversationId: string) {
-  return request.get(`/conversations/${conversationId}/messages`)
+  return http.get<ChatMessage[]>(`/conversations/${conversationId}/messages`)
 }
 
 export function deleteConversation(conversationId: string) {
-  return request.delete(`/conversations/${conversationId}`)
+  return http.delete<{ deleted: string }>(`/conversations/${conversationId}`)
 }

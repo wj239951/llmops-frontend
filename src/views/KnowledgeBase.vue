@@ -46,10 +46,11 @@ RAG知识库中心
 </template>
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import type { KnowledgeDocument } from '../types'
 import { createKnowledge, listKnowledge, updateKnowledge, deleteKnowledge, uploadKnowledge } from '../api/knowledge'
-import { ElMessage } from 'element-plus'
+import { ElMessage, type UploadFile } from 'element-plus'
 
-const rows = ref<any[]>([])
+const rows = ref<KnowledgeDocument[]>([])
 const KnowledgeId = ref<number | null>(null) // 正在编辑的知识库ID
 const selectedFile = ref<File | null>(null)
 const form = reactive({
@@ -57,8 +58,8 @@ const form = reactive({
   content: 'Prompt 管理、RAG、模型调用、日志监控、工具调用是工业 LLMOps 的核心能力。本地版使用Ollama 调用 deepseek-R1:7b，云端使用 DeepSeek API。'
 })
 
-function handleFileChange(file: any) {
-  selectedFile.value = file.raw
+function handleFileChange(file: UploadFile) {
+  selectedFile.value = file.raw ?? null
 }
 
 async function upload() {
@@ -68,7 +69,7 @@ async function upload() {
     ElMessage.success('文件上传成功')
     selectedFile.value = null
     await load()
-  } catch (e: any) {
+  } catch {
     // 错误提示已由 request.ts 的响应拦截器统一处理
   }
 }
@@ -83,12 +84,12 @@ async function save() {
   form.title = ''
   form.content = ''
 }
-async function editRow(row: any) {
+async function editRow(row: KnowledgeDocument) {
   KnowledgeId.value = row.id       // 记住正在编辑这条
   form.title = row.title           // 逐个字段赋值，避免污染 id/created_at
   form.content = row.content
 }
-async function deleteRow(row: any) {
+async function deleteRow(row: KnowledgeDocument) {
   await deleteKnowledge(row.id)
   await load()
 }

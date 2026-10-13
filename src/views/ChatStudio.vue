@@ -74,6 +74,9 @@ Token统计
            <el-button type="primary" :loading="loading" @click="submit">
             发送
            </el-button>
+           <el-button v-if="loading" @click="cancel">
+            取消
+           </el-button>
           </el-form>
          </div>
          <div class="card" v-if="messages.length">
@@ -129,20 +132,22 @@ style="margin-top: 10px"
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
+import type { ChatMessage, ChatRequestPayload, Conversation, Prompt, Source } from '../types'
 import { sendChat } from '../api/chat'
 import { listPrompts } from '../api/prompt'
 import { listConversations, createConversation, getMessages, deleteConversation } from '../api/conversations'
 
 const loading = ref(false)
+const controller = ref<AbortController | null>(null)
 const answer = ref('')
 const reasoning = ref('')
 const meta = ref('')
 const thought = ref('')
-const sources = ref<any[]>([])
+const sources = ref<Source[]>([])
 const sourcesExpanded = ref(false)
-const prompts = ref<any[]>([])
-const conversations = ref<any[]>([])
-const messages = ref<any[]>([])
+const prompts = ref<Prompt[]>([])
+const conversations = ref<Conversation[]>([])
+const messages = ref<ChatMessage[]>([])
 const form = reactive({
   query: '请介绍一下你自己',
   prompt_id: undefined as number | undefined,
@@ -187,7 +192,7 @@ async function switchConversation() {
   try {
     const res = await getMessages(form.conversation_id)
     messages.value = res
-  } catch (e: any) {
+  } catch {
     messages.value = []
   }
 }
@@ -211,9 +216,11 @@ async function submit() {
   meta.value = ''
   sources.value = []
   sourcesExpanded.value = false
+  const ctrl = new AbortController()
+  controller.value = ctrl
 
   try {
-    const res = await sendChat(form)
+    const res = await sendChat(form, ctrl.signal)
     answer.value = res.answer
     reasoning.value = res.reasoning || ''
     thought.value = res.thought
@@ -224,11 +231,19 @@ tokens=${res.total_tokens} / ${res.latency_ms}ms`
     if (form.conversation_id) {
       await switchConversation()
     }
-} catch (e: any) {
-answer.value = '请求失败：' + (e.response?.data?.detail || e.message)
-} finally {
-loading.value = false
+  } catch {
+    if (ctrl.signal.aborted) {
+      answer.value = '已取消'
+    }
+    // 其它错误：toast 已由 request.ts 拦截器统一弹出，这里不再重复提示
+  } finally {
+    loading.value = false
+    controller.value = null
+  }
 }
+
+function cancel() {
+  controller.value?.abort()
 }
 onMounted(() => { loadPrompts(); loadConversations() })
 </script>

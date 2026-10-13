@@ -32,14 +32,15 @@
  </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import type { ChatLog, LogQueryParams } from '../types'
 import { listLogs } from '../api/logs'
-const rows = ref<any[]>([])
+const rows = ref<ChatLog[]>([])
 const total = ref(0)       // 总条数，分页条用
 const page = ref(1)        // 当前页
 const pageSize = ref(10)   // 每页条数
 const status = ref('')     // 状态筛选，空=全部
 async function load() {
-  const params: any = { page: page.value, page_size: pageSize.value }
+  const params: LogQueryParams = { page: page.value, page_size: pageSize.value }
   if (status.value) params.status = status.value  // 选了才传，不传后端返回全部
   const data = await listLogs(params)
   rows.value = data.items

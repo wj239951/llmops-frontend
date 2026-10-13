@@ -1,9 +1,19 @@
 //prompt接口封装
-import { request } from './request'
-export function listPrompts() { return request.get('/prompts') }
-export function createPrompt(data: any) { return request.post('/prompts', data) }
+import { http } from './request'
+import type { Prompt, PromptPayload } from '../types'
 
-export function updatePrompt(id: number, data: any) { 
-    return request.put(`/prompts/${id}`, data) }//注意缩进格式
+export function listPrompts() {
+  return http.get<Prompt[]>('/prompts')
+}
 
-export function deletePrompt(id: number) { return request.delete(`/prompts/${id}`) }
+export function createPrompt(data: PromptPayload) {
+  return http.post<Prompt>('/prompts', data)
+}
+
+export function updatePrompt(id: number, data: PromptPayload) {
+  return http.put<Prompt>(`/prompts/${id}`, data)
+}
+
+export function deletePrompt(id: number) {
+  return http.delete<{ success: boolean }>(`/prompts/${id}`)
+}

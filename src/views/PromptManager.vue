@@ -47,8 +47,9 @@
             </template>
             <script setup lang="ts">
             import { computed, onMounted, reactive, ref, watch } from 'vue'
+            import type { Prompt } from '../types'
             import { createPrompt, deletePrompt, listPrompts, updatePrompt } from '../api/prompt'//多引入updataPrompt
-            const rows = ref<any[]>([])
+            const rows = ref<Prompt[]>([])
             const editingId = ref<number | null>(null)// 正在编辑的 Prompt ID
             const form = reactive({
                 name: '本地工业助手',
@@ -79,7 +80,7 @@
                 form.model_provider = ''
                 form.model_name = ''
              }
-            async function editRow(row: any) {
+            async function editRow(row: Prompt) {
               Object.assign(form, row)      // 把这一行的数据拷进 form
               editingId.value = row.id       // 记住正在编辑这条
             }

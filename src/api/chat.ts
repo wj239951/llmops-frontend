@@ -1,3 +1,7 @@
 //聊天接口封装
-import { request } from './request'
-export function sendChat(data: any) { return request.post('/chat', data) }
+import { http } from './request'
+import type { ChatRequestPayload, ChatResponse } from '../types'
+
+export function sendChat(data: ChatRequestPayload, signal?: AbortSignal) {
+  return http.post<ChatResponse>('/chat', data, { signal })
+}
