@@ -63,6 +63,7 @@ export interface Source {
   title: string
   snippet: string
   source: string | null
+  score?: number
 }
 
 /** 聊天返回（对应 ChatResponse） */
@@ -75,6 +76,7 @@ export interface ChatResponse {
   total_tokens: number
   latency_ms: number
   conversation_id: string | null
+  rag_status: 'off' | 'no_hit' | 'hit'
   sources: Source[]
 }
 

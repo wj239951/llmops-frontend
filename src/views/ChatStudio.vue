@@ -114,17 +114,32 @@ Token统计
 type="success"
 style="margin-top: 10px"
 />
-<div v-if="sources.length" style="margin-top: 12px">
-  <el-button text type="primary" size="small" @click="sourcesExpanded = !sourcesExpanded">
-    {{ sourcesExpanded ? '收起' : '展开' }} {{ sources.length }} 个参考来源
-  </el-button>
-  <div v-show="sourcesExpanded" style="margin-top: 8px">
-    <div v-for="(s, i) in sources" :key="i" class="source-item">
-      <span class="source-title">{{ s.title || '来源 ' + (i + 1) }}</span>
-      <a v-if="s.source" :href="s.source" target="_blank" class="source-link">{{ s.source }}</a>
-      <p v-if="s.snippet" class="source-snippet">{{ s.snippet }}</p>
+<div style="margin-top: 12px">
+  <el-alert
+    v-if="ragStatus === 'off'"
+    title="本次未启用 RAG"
+    type="info"
+    :closable="false"
+  />
+  <el-alert
+    v-else-if="ragStatus === 'no_hit'"
+    title="本次未命中知识库，以下为通用知识"
+    type="warning"
+    :closable="false"
+  />
+  <template v-else-if="ragStatus === 'hit'">
+    <el-button text type="primary" size="small" @click="sourcesExpanded = !sourcesExpanded">
+      {{ sourcesExpanded ? '收起' : '展开' }} {{ sources.length }} 个参考来源
+    </el-button>
+    <div v-show="sourcesExpanded" style="margin-top: 8px">
+      <div v-for="(s, i) in sources" :key="i" class="source-item">
+        <span class="source-title">{{ s.title || '来源 ' + (i + 1) }}</span>
+        <span v-if="s.score != null" class="source-score">score={{ s.score?.toFixed(4) }}</span>
+        <a v-if="s.source" :href="s.source" target="_blank" class="source-link">{{ s.source }}</a>
+        <p v-if="s.snippet" class="source-snippet">{{ s.snippet }}</p>
+      </div>
     </div>
-  </div>
+  </template>
 </div>
 </div>
 </div>
@@ -145,6 +160,7 @@ const meta = ref('')
 const thought = ref('')
 const sources = ref<Source[]>([])
 const sourcesExpanded = ref(false)
+const ragStatus = ref<'off' | 'no_hit' | 'hit'>('off')
 const prompts = ref<Prompt[]>([])
 const conversations = ref<Conversation[]>([])
 const messages = ref<ChatMessage[]>([])
@@ -183,6 +199,7 @@ async function newConversation() {
   thought.value = ''
   meta.value = ''
   sources.value = []
+  ragStatus.value = 'off'
 }
 async function switchConversation() {
   if (!form.conversation_id) {
@@ -206,6 +223,7 @@ async function deleteCurrentConversation() {
   thought.value = ''
   meta.value = ''
   sources.value = []
+  ragStatus.value = 'off'
   await loadConversations()
 }
 async function submit() {
@@ -216,6 +234,7 @@ async function submit() {
   meta.value = ''
   sources.value = []
   sourcesExpanded.value = false
+  ragStatus.value = 'off'
   const ctrl = new AbortController()
   controller.value = ctrl
 
@@ -225,6 +244,7 @@ async function submit() {
     reasoning.value = res.reasoning || ''
     thought.value = res.thought
     sources.value = res.sources || []
+    ragStatus.value = res.rag_status || 'off'
     meta.value = `${res.model_provider} / ${res.model_name} /
 tokens=${res.total_tokens} / ${res.latency_ms}ms`
     await loadConversations()
@@ -256,6 +276,11 @@ onMounted(() => { loadPrompts(); loadConversations() })
 .source-title {
   font-weight: 600;
   font-size: 14px;
+}
+.source-score {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #909399;
 }
 .source-link {
   display: block;
